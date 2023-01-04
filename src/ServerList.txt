@@ -1,0 +1,3 @@
+notepad,none,none,none,notepad.exe
+Edge,none,none,none,MicrosoftEdge.exe
+noteEdge,none,none,none,notepad.exe,notepad.exe
