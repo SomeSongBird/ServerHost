@@ -1,6 +1,4 @@
 import java.util.*;
-import java.lang.ProcessBuilder;
-import java.lang.Thread;
 
 public class Menu{
 
@@ -8,15 +6,37 @@ public class Menu{
         Scanner s = new Scanner(System.in);
         ServerContainer sc = new ServerContainer();
 
-        System.out.println("Enter a the game you want to start");
-        while(true){
+        System.out.println("Enter a the game you want to start\nEnter h for more options");
+        boolean exit = false;
+        while(s.hasNext()){
             String str = s.nextLine().strip();
             int select=0;
             try{
                 select = Integer.parseInt(str)-1;
             }catch(Exception e){
-                if(str.toLowerCase().equals("exit"))break;
-                else continue;
+                switch (str) {
+                    case "h":
+                    case "H":
+                    case "help":
+                    case "Help":
+                        System.out.println("list) list available servers\nnew) add a new server to the list\nexit) close the program");
+                        break;
+                    case "list":
+                        for(int i=0;i<sc.serverList.length;i++){
+                            System.out.printf("%d:%s\n",i+1,sc.serverList[i].name);
+                        }
+                        break;
+                    case "exit":
+                        exit = true;
+                        break;
+                    case "new":
+                        updateList(sc,s);
+                        break;
+                    default:
+                    break;
+                }
+                if(exit) break;
+                continue;
             }
             if(select>=0 && select<sc.serverList.length){
                 System.out.println(sc.serverList[select].name);
@@ -31,19 +51,34 @@ public class Menu{
         }
         s.close();
     }
+    
+    public void updateList(ServerContainer sc,Scanner s){
+        String name = "";
+        String start = "";
+        String exit = "";
+        
+        while(name.equals("")){
+            System.out.print("Server Name: ");
+            name = s.nextLine();
+            if(name.equals(""))System.out.println("No valid name detected");
+        }
 
-    public void updateList(){
-        String name = "Bestguy";
-        String start = "notepad.exe";
-        String exit = "none";
+        while(start.equals("")){
+            System.out.print("Server startup command or script: ");
+            start = s.nextLine();
+            if(start.equals(""))System.out.println("No valid startup command detected");
+        }
 
-        ServerContainer sc = new ServerContainer();
+        
+        System.out.print("Server shutdown command or script (leave blank if there is none): ");
+        exit = s.nextLine();
+
         sc.addNewServer(name,start,exit);
     }
 
     public static void main(String[]args){
         Menu m = new Menu();
-        m.updateList();
+        //m.updateList();
         m.loadMenu();
     }
 }

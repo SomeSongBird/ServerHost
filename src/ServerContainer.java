@@ -2,8 +2,8 @@ import java.util.Scanner;
 import java.io.*;
 
 public class ServerContainer{
-    String serverListLocation = "ServerList.txt";
-    Server[] serverList = new Server[0]; 
+    static String serverListLocation = "ServerList.txt";
+    public Server[] serverList; 
 
     public ServerContainer(){
         readList();
@@ -13,6 +13,7 @@ public class ServerContainer{
         try{
             Scanner fr = new Scanner(new File(serverListLocation));
             String info;
+            this.serverList = new Server[0];
             while(fr.hasNextLine()){
                 info = fr.nextLine();
                 readServerInfo(info);
@@ -28,7 +29,6 @@ public class ServerContainer{
     public void readServerInfo(String serverInfo){
         //System.out.println(serverInfo);
         String[] serverInfoList = serverInfo.strip().split(",");
-
         String startCommand = serverInfoList[1];
         String exitCommand = serverInfoList[2];
         
