@@ -30,9 +30,10 @@ public class ServerContainer{
         System.out.println(serverInfo);
         String[] serverInfoList = serverInfo.strip().split(",");
 
-        String[] cmds = Arrays.copyOfRange(serverInfoList,4,serverInfoList.length);
+        String sartCommand = serverInfoList[1] ;
+        String exitCommand = serverInfoList[2];
         //System.out.println(cmds[0]);
-        Server s = new Server(serverInfoList[0],cmds,serverInfoList[1],serverInfoList[2],serverInfoList[3]);
+        Server s = new Server(serverInfoList[0],sartCommand,exitCommand);
 
         Server[] tmp = new Server[this.serverList.length+1];
         int i = 0;
@@ -43,14 +44,9 @@ public class ServerContainer{
         this.serverList = tmp;
     }
 
-    public boolean addNewServer(String name,String commands,String inputSource,String outputDump,String errorDump){
-        if(inputSource=="") inputSource = "none";
-        if(outputDump=="") outputDump = name+"_outut.txt";
-        if(errorDump=="") errorDump = name+"_errors.txt";
-        commands = commands.strip().replaceAll("\n",",");
-        String serverInfo = name+","+inputSource+","+outputDump+","+errorDump+","+commands+"\n";
+    public boolean addNewServer(String name,String start,String exit){
+        String serverInfo = name+","+start+","+exit+"\n";
         
-
         String newServs = "";
         boolean set = false;
         try{

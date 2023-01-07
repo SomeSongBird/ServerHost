@@ -1,42 +1,31 @@
-import java.util.List;
 import java.lang.ProcessBuilder;
-import java.io.File;
+import java.io.*;
 
 public class Server{
-    ProcessBuilder[] pb;
-    Process[] p;
+    ProcessBuilder pb;
+    String startCommand;
+    String exitCommand;
     String name;
 
-    public Server(String name, String[] cmds, String input, String output, String error){
+    public Server(String name, String startingCommand,String exitCommand){
         this.name = name;
-
-        pb = new ProcessBuilder[cmds.length];
-        p = new Process[cmds.length];
-        try{
-            for(int i=0;i<cmds.length;i++){
-                //System.out.println(cmds[i]);
-                pb[i] = new ProcessBuilder(cmds[i]);
-                if(!input.equals("none")) pb[i].redirectInput(new File(input));
-                if(!output.equals("none")) pb[i].redirectOutput(new File(output));
-                if(!error.equals("none")) pb[i].redirectError(new File(error));
-            }
-        }catch(Exception e){
-            System.out.println("Error creating Server object for:"+name);
-        }
+        this.startCommand = startingCommand;
+        this.exitCommand = exitCommand;
     }
 
-    public void changeState(){
+    public void start(){
         try{
-            for(int i=0;i<p.length;i++){
-                if(p[i]==null){
-                    p[i] = pb[i].start();
-                    System.out.println("Started Server");
-                }else{
-                    p[i].destroy();
-                    p[i] = null;
-                    System.out.println("Stopped Server");
-                }
-            }
+            Process p = new ProcessBuilder(startCommand).start();
+            System.out.println("Started Server");
+        }catch(Exception e){
+            System.out.println("oopsie woopsie, there was a little fucky wucky");
+            System.out.println(e.getMessage());
+        }
+    }
+    public void stop(){
+        try{
+            Process exitProcess = new ProcessBuilder(exitCommand).start();
+            exitProcess.waitFor();
         }catch(Exception e){
             System.out.println("oopsie woopsie, there was a little fucky wucky");
             System.out.println(e.getMessage());
