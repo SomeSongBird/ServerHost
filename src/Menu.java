@@ -11,25 +11,34 @@ public class Menu{
         System.out.println("Enter a the game you want to start");
         while(true){
             String str = s.nextLine().strip();
-            int select = Integer.parseInt(str)-1;
+            int select=0;
+            try{
+                select = Integer.parseInt(str)-1;
+            }catch(Exception e){
+                if(str.toLowerCase().equals("exit"))break;
+                else continue;
+            }
             if(select>=0 && select<sc.serverList.length){
                 System.out.println(sc.serverList[select].name);
-                sc.serverList[select].changeState();
+                if(sc.serverList[select].running){
+                    sc.serverList[select].stop();
+                }else{
+                    sc.serverList[select].start();
+                }
             }else{
                 System.out.println("Value not in range");
             }
         }
+        s.close();
     }
 
     public void updateList(){
         String name = "Bestguy";
-        String commands = "notepad.exe\nnotepad.exe";
-        String input = "";
-        String output = "";
-        String error = "";
+        String start = "notepad.exe";
+        String exit = "none";
 
         ServerContainer sc = new ServerContainer();
-        sc.addNewServer(name,commands,input,output,error);
+        sc.addNewServer(name,start,exit);
     }
 
     public static void main(String[]args){

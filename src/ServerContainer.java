@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.Arrays;
 import java.io.*;
 
 public class ServerContainer{
@@ -27,13 +26,13 @@ public class ServerContainer{
     }
 
     public void readServerInfo(String serverInfo){
-        System.out.println(serverInfo);
+        //System.out.println(serverInfo);
         String[] serverInfoList = serverInfo.strip().split(",");
 
-        String sartCommand = serverInfoList[1] ;
+        String startCommand = serverInfoList[1];
         String exitCommand = serverInfoList[2];
-        //System.out.println(cmds[0]);
-        Server s = new Server(serverInfoList[0],sartCommand,exitCommand);
+        
+        Server s = new Server(serverInfoList[0],startCommand,exitCommand);
 
         Server[] tmp = new Server[this.serverList.length+1];
         int i = 0;

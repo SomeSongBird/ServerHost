@@ -1,21 +1,24 @@
 import java.lang.ProcessBuilder;
-import java.io.*;
+//import java.io.*;
 
 public class Server{
-    ProcessBuilder pb;
-    String startCommand;
-    String exitCommand;
-    String name;
+    private String startCommand;
+    private String exitCommand;
+    private Process process;
+    public boolean running;
+    public String name;
 
     public Server(String name, String startingCommand,String exitCommand){
         this.name = name;
         this.startCommand = startingCommand;
         this.exitCommand = exitCommand;
+        this.running = false;
     }
 
     public void start(){
         try{
-            Process p = new ProcessBuilder(startCommand).start();
+            process = new ProcessBuilder(startCommand).start();
+            this.running = true;
             System.out.println("Started Server");
         }catch(Exception e){
             System.out.println("oopsie woopsie, there was a little fucky wucky");
@@ -24,8 +27,14 @@ public class Server{
     }
     public void stop(){
         try{
+            if(exitCommand.equals("none")){
+                process.destroy();
+                this.running = false;    
+                return;
+            }
             Process exitProcess = new ProcessBuilder(exitCommand).start();
             exitProcess.waitFor();
+            this.running = false;
         }catch(Exception e){
             System.out.println("oopsie woopsie, there was a little fucky wucky");
             System.out.println(e.getMessage());
