@@ -1,5 +1,7 @@
 package serverhost;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.lang.ProcessBuilder;
 //import java.io.*;
 
@@ -19,7 +21,8 @@ public class Server{
 
     public void start(){
         try{
-            process = new ProcessBuilder(startCommand).start();
+            String[] start = startCommand.split(" ");
+            process = new ProcessBuilder(start).start();
             this.running = true;
             System.out.println("Started Server");
         }catch(Exception e){
@@ -34,14 +37,23 @@ public class Server{
         }
     }
 
+    public BufferedInputStream getInputStream(){
+        return new BufferedInputStream(process.getInputStream());
+    }
+    public BufferedOutputStream getOutputStream(){
+        return new BufferedOutputStream(process.getOutputStream());
+    }
+
     public void stop(){
         try{
-            if(exitCommand.equals("none")){
+            if(exitCommand.equals("")){
                 //process.destroy();
-                //this.running = false;    
+                //this.running = false;  
+                System.out.println("No exit script available, close server through command inputs");  
                 return;
             }
-            Process exitProcess = new ProcessBuilder(exitCommand).start();
+            String[] exit = exitCommand.split(" ");
+            Process exitProcess = new ProcessBuilder(exit).start();
             exitProcess.waitFor();
             this.running = false;
         }catch(Exception e){
