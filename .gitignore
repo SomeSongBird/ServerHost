@@ -1,7 +1,8 @@
 .gradle
 .vscode
 
-build
-bin
+app/bin
+app/build/*
 
-!app/build/distributions/*
+!app/build/distributions
+
