@@ -23,15 +23,22 @@ public class Server{
             this.running = true;
             System.out.println("Started Server");
         }catch(Exception e){
-            System.out.println("oopsie woopsie, there was a little fucky wucky");
-            System.out.println(e.getMessage());
+            System.err.println("oopsie woopsie, there was a little fucky wucky");
+            System.err.println(e.getMessage());
         }
     }
+
+    public void checkForStopped(){
+        if(!process.isAlive()){
+            this.running = false;
+        }
+    }
+
     public void stop(){
         try{
             if(exitCommand.equals("none")){
-                process.destroy();
-                this.running = false;    
+                //process.destroy();
+                //this.running = false;    
                 return;
             }
             Process exitProcess = new ProcessBuilder(exitCommand).start();
