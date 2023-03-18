@@ -11,31 +11,35 @@ public class ServerContainer{
         readList();
     }
 
-    public void readList(){
+    private void readList(){
         try{
             Scanner fr = new Scanner(new File(serverListLocation));
             String info;
             this.serverList = new Server[0];
             while(fr.hasNextLine()){
                 info = fr.nextLine();
-                if(info.charAt(0)=='#') continue; // comments
+                // if(info.charAt(0)=='#') continue; // comments
                 readServerInfo(info);
             }
             fr.close();
         }catch(Exception e){
-            System.out.println("Error reading server list");
-            System.out.println(e.getMessage());
+            System.err.println("Error reading server list");
+            System.err.println(e.getMessage());
             return;
         }
     }
-
-    public void readServerInfo(String serverInfo){
+    
+    private void readServerInfo(String serverInfo){
         //System.out.println(serverInfo);
         String[] serverInfoList = serverInfo.strip().split(",");
+        String serverName = serverInfoList[0];
         String startCommand = serverInfoList[1];
-        String exitCommand = serverInfoList[2];
+        String exitCommand = "";
+        if(serverInfoList.length>=3){
+            exitCommand = serverInfoList[2];
+        }
         
-        Server s = new Server(serverInfoList[0],startCommand,exitCommand);
+        Server s = new Server(serverName,startCommand,exitCommand);
 
         Server[] tmp = new Server[this.serverList.length+1];
         int i = 0;
@@ -44,6 +48,19 @@ public class ServerContainer{
         }
         tmp[i] = s;
         this.serverList = tmp;
+    }
+    
+    private void writeList(){
+        try{
+            FileWriter fw = new FileWriter(new File(serverListLocation));
+            for(Server server : serverList){
+                fw.write(server.toString()+"\n");
+            }
+            fw.close();
+        }catch(Exception e){
+            System.err.println("Error writing server list");
+            System.err.println(e.getMessage());
+        }
     }
 
     public boolean addNewServer(String name,String start,String exit){
