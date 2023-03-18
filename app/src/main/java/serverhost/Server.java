@@ -49,4 +49,8 @@ public class Server{
             System.out.println(e.getMessage());
         }
     }
+
+    public String toString(){
+        return name+","+startCommand+","+exitCommand;
+    }
 }
