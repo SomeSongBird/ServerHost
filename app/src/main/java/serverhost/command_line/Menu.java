@@ -1,87 +1,243 @@
 package serverhost.command_line;
 
 import serverhost.*;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.util.*;
+//import java.util.regex.*;
 
 public class Menu{
 
-    public void loadMenu(){
-        Scanner s = new Scanner(System.in);
-        ServerContainer sc = new ServerContainer();
+//#region init
+    Scanner userInput = new Scanner(System.in);
+    ServerContainer serverContainer;
+    public Menu(ServerContainer sc){
+        serverContainer = sc;
+    }
+//#endregion
 
-        System.out.println("Enter a the game you want to start\nEnter h for more options");
-        boolean exit = false;
-        while(s.hasNext()){
-            String str = s.nextLine().strip();
-            int select=0;
-            try{
-                select = Integer.parseInt(str)-1;
-            }catch(Exception e){
-                switch (str) {
-                    case "h":
-                    case "H":
-                    case "help":
-                    case "Help":
-                        System.out.println("list) list available servers\nnew) add a new server to the list\nexit) close the program");
-                        break;
-                    case "list":
-                        for(int i=0;i<sc.serverList.length;i++){
-                            System.out.printf("%d:%s\n",i+1,sc.serverList[i].name);
-                        }
-                        break;
-                    case "exit":
-                        exit = true;
-                        break;
-                    case "new":
-                        updateList(sc,s);
-                        break;
-                    default:
-                    break;
-                }
-                if(exit) break;
-                continue;
+//#region helpers
+
+    private String greenColorCode = "\033[92m";
+    private String redColorCode = "\033[91m";
+    private String defaultColor = "\033[0m";
+
+    private boolean cancel(String input){
+        String ui = input.toLowerCase();
+        if(ui.equals("cancel")||ui.equals("exit")){
+            return true;
+        }
+        return false;
+    }
+
+    private String getUserInput(){
+        String in = userInput.nextLine().strip();
+        return in;
+    }
+
+    public static void waitForNextKeystroke(){
+        try{
+            while(System.in.available()==0){
+                Thread.sleep(100);
             }
-            if(select>=0 && select<sc.serverList.length){
-                System.out.println(sc.serverList[select].name);
-                if(sc.serverList[select].running){
-                    sc.serverList[select].stop();
-                }else{
-                    sc.serverList[select].start();
-                }
-            }else{
-                System.out.println("Value not in range");
+            System.in.read();
+        }catch(Exception e){}
+    }
+
+    private static void clearScreen() {  
+        System.out.print("\033[H\033[2J");  
+        System.out.flush();  
+    } 
+//#endregion helpers
+
+//#region menus
+    public void intro(){
+        clearScreen();
+        System.out.println("Welcome to ServerHost: the host of all your servers!");
+        System.out.print("Press Enter to start");
+        waitForNextKeystroke();
+        mainMenu();
+    }
+
+    public void mainMenu(){
+        clearScreen();
+        boolean cont = true;
+        while(cont){
+            displayServers();
+            cont = mainOptions();
+            clearScreen();
+        }
+    }
+
+    private void displayServers(){
+        System.out.println("------ ServerHost Managed Servers ------");
+        int index = 1;
+        for(Server server : serverContainer.serverList){
+            String running = (server.running)? greenColorCode+"{Running}"+defaultColor : redColorCode+"{Not Running}"+defaultColor;
+            System.out.println("  "+index+": "+server.name+"|"+running);
+        }
+    }
+
+    private boolean mainOptions(){
+        System.out.println("------------------------------------------");
+        while(true){
+            String input = getUserInput().trim().toLowerCase();
+            String[] inputs = input.split(" ");
+            switch(inputs[0]){
+                case "h":
+                case "help":
+                case "options":
+                    System.out.println("help                -> display vailable options");
+                    System.out.println("start <serverID>    -> start the server listed at the serverID");
+                    System.out.println("stop <serverID>     -> stop the server listed at the serverID");
+                    System.out.println("update <serverID>   -> update the details about the listed serverID");
+                    System.out.println("command <serverID>  -> open the command line for the listed server");
+                    System.out.println("newServer           -> add a new server to the server list");
+                    System.out.println("quit                -> shutdown all servers and close ServerHost");
+                    System.out.println("------------------------------------------");
+                    break;
+                case "start":
+                    try{
+                        int serverID = Integer.parseInt(inputs[1]);
+                        System.out.println("input: "+serverID);
+                        if(serverID>0 && serverID<=serverContainer.serverList.length){
+                            if(!serverContainer.serverList[serverID-1].running){
+                                serverContainer.serverList[serverID-1].start();
+                            }else{
+                                System.out.println("Server is already running");
+                            }
+                        }else{
+                            System.out.println("Server ID not found");
+                        }
+                    }catch(Exception e){
+                        System.out.println("Entered ID isn't a number");
+                        System.out.println(e.getMessage());
+                    }
+                    waitForNextKeystroke();
+                    return true;
+                case "stop":
+                    try{
+                        int serverID = Integer.parseInt(inputs[1]);
+                        if(serverID>0 && serverID<=serverContainer.serverList.length){
+                            if(serverContainer.serverList[serverID-1].running){
+                                serverContainer.serverList[serverID-1].stop();
+                            }else{
+                                System.out.println("Server is not running");
+                            }
+                        }else{
+                            System.out.println("Server ID not found");
+                        }
+                    }catch(Exception e){
+                        System.out.println("Entered ID isn't a number");
+                    }
+                    waitForNextKeystroke();
+                    return true;
+                case "update":
+                    try{
+                        int serverID = Integer.parseInt(inputs[1]);
+                        if(serverID>0 && serverID<=serverContainer.serverList.length){
+                            if(!serverContainer.serverList[serverID-1].running){
+                                String[] serverDetails = addNewServer();
+                                Server updateServer = new Server(serverDetails[0], serverDetails[1], serverDetails[2]);
+                                serverContainer.serverList[serverID-1] = updateServer;
+                            }else{
+                                System.out.println("Cannot update server details while server is already running");
+                            }
+                        }else{
+                            System.out.println("Server ID not found");
+                        }
+                    }catch(Exception e){
+                        System.out.println("Entered ID isn't a number");
+                    }
+                    waitForNextKeystroke();
+                    return true;
+                case "command":
+                    int serverID = Integer.parseInt(inputs[1]);
+                    if(serverID>0 && serverID<=serverContainer.serverList.length){
+                        if(serverContainer.serverList[serverID-1].running){
+                            commandServer(serverContainer.serverList[serverID-1]);
+                        }else{
+                            System.out.println("Server is not running");
+                        }
+                    }else{
+                        System.out.println("Server ID not found");
+                    }
+                    return true;
+                case "new":
+                case "new_server":
+                    String[] serverDetails = addNewServer();
+                    if(serverDetails!=null){
+                        if(serverContainer.addNewServer(serverDetails[0], serverDetails[1], serverDetails[2])){
+                            System.out.println("Successfully added new server");
+                        }else{
+                            System.out.println("Something went wrong adding new server");
+                        }
+                        waitForNextKeystroke();
+                    }
+                    return true;
+                
+                case "exit":
+                case "shutdown":
+                case "q":
+                case "quit":
+                    return false;
             }
         }
-        s.close();
     }
-    
-    public void updateList(ServerContainer sc,Scanner s){
+
+    private String[] addNewServer(){
         String name = "";
         String start = "";
         String exit = "";
-        
+
         while(name.equals("")){
+            clearScreen();
             System.out.print("Server Name: ");
-            name = s.nextLine();
-            if(name.equals(""))System.out.println("No valid name detected");
+            name = getUserInput();
+            name = name.trim();
+            if(cancel(name)) return null;
+            if(name.equals("")){
+                System.out.println("No valid name detected");
+                waitForNextKeystroke();
+            }
         }
-
-        while(start.equals("")){
-            System.out.print("Server startup command or script: ");
-            start = s.nextLine();
-            if(start.equals(""))System.out.println("No valid startup command detected");
-        }
-
         
+        while(start.equals("")){
+            clearScreen();
+            System.out.print("Server startup command or script: ");
+            start = getUserInput();
+            if(cancel(name)) return null;
+            if(start.equals("")){
+                System.out.println("No valid startup command detected");
+                waitForNextKeystroke();
+            }
+        }
+        clearScreen();
         System.out.print("Server shutdown command or script (leave blank if there is none): ");
-        exit = s.nextLine();
-
-        sc.addNewServer(name,start,exit);
+        exit = getUserInput();
+        if(cancel(name)) return null;
+        return new String[]{name,start,exit};
     }
 
-    public static void main(String[]args){
-        Menu m = new Menu();
-        //m.updateList();
-        m.loadMenu();
+    private void commandServer(Server server){
+        Scanner incoming_text = new Scanner(server.getInputStream());
+        BufferedOutputStream outgoing_commands = server.getOutputStream();
+
+        while(true){
+            try {
+                if(incoming_text.hasNext()) System.out.print(incoming_text.nextLine());
+                if(userInput.hasNext()) {
+                    String userCommand = userInput.nextLine();
+                    if(cancel(userCommand)) break;
+                    outgoing_commands.write(userCommand.getBytes());
+                }
+                Thread.sleep(100); //to prevent the fans from spinning out of control
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
+
+//#endregion menus
 }
