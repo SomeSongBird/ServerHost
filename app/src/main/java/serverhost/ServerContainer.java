@@ -18,6 +18,7 @@ public class ServerContainer{
             this.serverList = new Server[0];
             while(fr.hasNextLine()){
                 info = fr.nextLine();
+                if(info.charAt(0)=='#') continue; // comments
                 readServerInfo(info);
             }
             fr.close();
