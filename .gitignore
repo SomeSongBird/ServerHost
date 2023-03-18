@@ -1,4 +1,7 @@
-*.bat
-*.txt
-*.class
-Test*
+# Ignore Gradle project-specific cache directory
+.gradle
+.vscode
+app/bin
+app/build
+# Ignore Gradle build output directory
+build

@@ -1,3 +1,0 @@
-notepad,notepad.exe,none\
-Edge,MicrosoftEdge.exe,exec.bat
-noteEdge,both.bat,closeboth.bat

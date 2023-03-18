@@ -1,3 +1,6 @@
+package serverhost.command_line;
+
+import serverhost.*;
 import java.util.*;
 
 public class Menu{
