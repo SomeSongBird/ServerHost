@@ -1,9 +1,7 @@
 package serverhost;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.*;
 import java.lang.ProcessBuilder;
-//import java.io.*;
 
 public class Server{
     private String startCommand;
@@ -31,35 +29,46 @@ public class Server{
         }
     }
 
-    public void checkForStopped(){
-        if(!process.isAlive()){
-            this.running = false;
+    public InputStreamReader getInputStream(){
+        return new InputStreamReader(process.getInputStream());
+    }
+    public OutputStream getOutputStream(){
+        return process.getOutputStream();
+    }
+
+    public boolean checkAlive(){
+        if(process!=null){
+            return(process.isAlive());
         }
+        return false;
     }
 
-    public BufferedInputStream getInputStream(){
-        return new BufferedInputStream(process.getInputStream());
-    }
-    public BufferedOutputStream getOutputStream(){
-        return new BufferedOutputStream(process.getOutputStream());
-    }
-
-    public void stop(){
+    public boolean stop(){
+        if(!checkAlive()){
+            this.running = false;
+            return true;
+        }
         try{
             if(exitCommand.equals("")){
                 //process.destroy();
                 //this.running = false;  
                 System.out.println("No exit script available, close server through command inputs");  
-                return;
+                return false;
             }
             String[] exit = exitCommand.split(" ");
             Process exitProcess = new ProcessBuilder(exit).start();
             exitProcess.waitFor();
             this.running = false;
+            return true;
         }catch(Exception e){
             System.out.println("oopsie woopsie, there was a little fucky wucky");
             System.out.println(e.getMessage());
+            return false;
         }
+    }
+
+    public void forceStop(){
+        process.destroyForcibly();
     }
 
     public String toString(){

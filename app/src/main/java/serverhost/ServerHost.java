@@ -9,8 +9,8 @@ public class ServerHost{
         ServerContainer serverContainer = new ServerContainer();
         if(args.length>0){
             if(args[0].equals("commandLine")){
-                Menu m = new Menu(serverContainer);
-                m.intro();
+                Menu menu = new Menu(serverContainer);
+                menu.intro();
             }
         }
     }

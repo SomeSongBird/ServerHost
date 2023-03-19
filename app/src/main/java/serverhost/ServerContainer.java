@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.io.*;
 
 public class ServerContainer{
-    static String serverListLocation = "ServerList.txt";
+    static String serverListLocation = "C:/Users/ferchrj/Desktop/ServerList.txt";
     public Server[] serverList; 
 
     public ServerContainer(){
@@ -18,6 +18,7 @@ public class ServerContainer{
             this.serverList = new Server[0];
             while(fr.hasNextLine()){
                 info = fr.nextLine();
+                if(info=="") continue;
                 // if(info.charAt(0)=='#') continue; // comments
                 readServerInfo(info);
             }
@@ -40,14 +41,15 @@ public class ServerContainer{
         }
         
         Server s = new Server(serverName,startCommand,exitCommand);
-
-        Server[] tmp = new Server[this.serverList.length+1];
-        int i = 0;
-        for(;i<this.serverList.length;i++){
-            tmp[i] = this.serverList[i];
+        if(s!=null){
+            Server[] tmp = new Server[this.serverList.length+1];
+            for(int i = 0;i<this.serverList.length;i++){
+                tmp[i] = this.serverList[i];
+            }
+            tmp[tmp.length-1] = s;
+            this.serverList = tmp;
+            return;
         }
-        tmp[i] = s;
-        this.serverList = tmp;
     }
     
     private void writeList(){
@@ -63,31 +65,27 @@ public class ServerContainer{
         }
     }
 
-    public boolean addNewServer(String name,String start,String exit){
-        String serverInfo = name+","+start+","+exit+"\n";
-        
-        String newServs = "";
-        boolean set = false;
-        try{
-            Scanner fr = new Scanner(new File(serverListLocation));
-            while(fr.hasNextLine()){
-                String servs = fr.nextLine()+"\n";
-                if((int)Character.toLowerCase(serverInfo.charAt(0))<(int)Character.toLowerCase(servs.charAt(0)) & !set){
-                    set = true;
-                    newServs+=serverInfo;
+    public void shutdown(){
+        for(Server server : serverList){
+            if(server.running){
+                if(!server.stop()){
+                    server.forceStop();
                 }
-                newServs+=servs;
             }
-            if(!set) newServs+=serverInfo;
-            fr.close();
-            
-            FileWriter fw = new FileWriter(serverListLocation);
-            fw.write(newServs);
-            fw.close();
+        }
+        writeList();
+    }
 
-            readList();
+    public boolean addNewServer(String name,String start,String exit){
+        try{
+            Server newServer = new Server(name, start, exit);
+            Server[] newList = new Server[serverList.length+1];
+            for(int i = 0;i<newList.length;i++){
+                newList[i] = serverList[i];
+            }
+            newList[newList.length-1] = newServer;
+            serverList = newList;
         }catch(Exception e){
-            System.out.println("Error updating server list");
             return false;
         }
         return true;
