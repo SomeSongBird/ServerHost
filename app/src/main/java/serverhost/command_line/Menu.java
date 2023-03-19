@@ -2,7 +2,6 @@ package serverhost.command_line;
 
 import serverhost.*;
 
-import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.*;
