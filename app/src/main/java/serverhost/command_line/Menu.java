@@ -4,6 +4,7 @@ import serverhost.*;
 
 import java.io.OutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.util.*;
 //import java.util.regex.*;
 
@@ -220,7 +221,7 @@ public class Menu{
 
     private void commandServer(Server server){
         BufferedReader reader = new BufferedReader(server.getInputStream());
-        OutputStream outgoing_commands = server.getOutputStream();
+        BufferedWriter outgoing_commands = new BufferedWriter(server.getOutputStream());
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -232,9 +233,10 @@ public class Menu{
         while(true){
             String command = getUserInput();
             if(cancel(command))break;
-            command = command+"\n";
-            try {outgoing_commands.write(command.getBytes(),0,command.length());} 
-            catch (Exception e) {break;}
+            command = command+"\r\n";
+            try {outgoing_commands.write(command);
+                outgoing_commands.flush();
+            } catch (Exception e) {break;}
         }
         t.interrupt();
     }

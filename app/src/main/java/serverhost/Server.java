@@ -32,8 +32,8 @@ public class Server{
     public InputStreamReader getInputStream(){
         return new InputStreamReader(process.getInputStream());
     }
-    public OutputStream getOutputStream(){
-        return process.getOutputStream();
+    public OutputStreamWriter getOutputStream(){
+        return new OutputStreamWriter(process.getOutputStream());
     }
 
     public boolean checkAlive(){
