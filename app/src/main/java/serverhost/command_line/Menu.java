@@ -14,14 +14,28 @@ public class Menu{
     ServerContainer serverContainer;
     public Menu(ServerContainer sc){
         serverContainer = sc;
+        ansiEscape();
     }
 //#endregion
 
 //#region helpers
-
-    private String greenColorCode = "\033[92m";
-    private String redColorCode = "\033[91m";
-    private String defaultColor = "\033[0m";
+    private String escapeChar;
+    private String greenColorCode;
+    private String redColorCode;
+    private String defaultColor;
+    private static String clearScreenCode;
+    private void ansiEscape(){
+        String os = System.getProperty("os.name").toLowerCase();
+        if(os.contains("win")){
+            escapeChar = "Esc";
+        }else{
+            escapeChar = "\033";
+        }
+        greenColorCode = escapeChar+"[92m";
+        redColorCode = escapeChar+"[91m";
+        defaultColor = escapeChar+"[0m";
+        clearScreenCode = escapeChar+"[H"+ escapeChar+"[2J";
+    }
 
     private boolean cancel(String input){
         String ui = input.toLowerCase();
@@ -46,7 +60,7 @@ public class Menu{
     }
 
     private static void clearScreen() {  
-        System.out.print("\033[H\033[2J");  
+        System.out.print(clearScreenCode);  
         System.out.flush();  
     } 
 //#endregion helpers
