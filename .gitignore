@@ -3,6 +3,7 @@
 
 app/bin
 app/build/*
+dump
+startapp.bat
 
-!app/build/distributions
-
+!app/build/distributions/
