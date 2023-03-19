@@ -2,8 +2,8 @@ package serverhost.command_line;
 
 import serverhost.*;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.io.BufferedReader;
 import java.util.*;
 //import java.util.regex.*;
 
@@ -75,7 +75,7 @@ public class Menu{
         int index = 1;
         for(Server server : serverContainer.serverList){
             String running = (server.running)? greenColorCode+"{Running}"+defaultColor : redColorCode+"{Not Running}"+defaultColor;
-            System.out.println("  "+index+": "+server.name+"|"+running);
+            System.out.println("  "+(index++)+": "+server.name+"|"+running);
         }
     }
 
@@ -112,7 +112,6 @@ public class Menu{
                         }
                     }catch(Exception e){
                         System.out.println("Entered ID isn't a number");
-                        System.out.println(e.getMessage());
                     }
                     waitForNextKeystroke();
                     return true;
@@ -131,7 +130,6 @@ public class Menu{
                     }catch(Exception e){
                         System.out.println("Entered ID isn't a number");
                     }
-                    waitForNextKeystroke();
                     return true;
                 case "update":
                     try{
@@ -176,11 +174,11 @@ public class Menu{
                         waitForNextKeystroke();
                     }
                     return true;
-                
                 case "exit":
                 case "shutdown":
                 case "q":
                 case "quit":
+                    serverContainer.shutdown();
                     return false;
             }
         }
@@ -221,20 +219,34 @@ public class Menu{
     }
 
     private void commandServer(Server server){
-        Scanner incoming_text = new Scanner(server.getInputStream());
-        BufferedOutputStream outgoing_commands = server.getOutputStream();
-
+        BufferedReader reader = new BufferedReader(server.getInputStream());
+        OutputStream outgoing_commands = server.getOutputStream();
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                getInputFromServer(reader);
+                } catch(Exception t) { return;}
+            }
+        });
+        t.start();
         while(true){
-            try {
-                if(incoming_text.hasNext()) System.out.print(incoming_text.nextLine());
-                if(userInput.hasNext()) {
-                    String userCommand = userInput.nextLine();
-                    if(cancel(userCommand)) break;
-                    outgoing_commands.write(userCommand.getBytes());
-                }
-                Thread.sleep(100); //to prevent the fans from spinning out of control
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            String command = getUserInput();
+            if(cancel(command))break;
+            command = command+"\n";
+            try {outgoing_commands.write(command.getBytes(),0,command.length());} 
+            catch (Exception e) {break;}
+        }
+        t.interrupt();
+    }
+
+    private void getInputFromServer(BufferedReader reader){
+        while(true){
+            if(Thread.interrupted()) return;
+            try{
+                if(reader.ready()) System.out.println(reader.readLine());
+                else Thread.sleep(50);
+            }catch(Exception e){
+                return;
             }
         }
     }
