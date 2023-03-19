@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.io.*;
 
 public class ServerContainer{
-    static String serverListLocation = "C:/Users/ferchrj/Desktop/ServerList.txt";
+    static String serverListLocation = "ServerList.txt";
     public Server[] serverList; 
 
     public ServerContainer(){
