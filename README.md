@@ -2,13 +2,13 @@
 
 ## A project to make managing multiple servers (or applications) simple and in one place
 
-###Requirements
+### Requirements
 
 This app was compiled with java 18.
 If you have an earlier version of java (you can check by typing java -version into a command line), you will need to either download the latest version of java
 or follow the extra instructions below to recompile the app.  
 
-###To install
+### To install
 
 In this github, navigate to app/build/distributions and download app.zip.
 Once downloaded, unzip the contents to a location of your choosing.  In the same place you unzipped the file, make a new text file called ServerList.
@@ -29,7 +29,7 @@ That file will need to have its permissions set too so type:
 
 To run the app, just execute that script.
 
-###Recompiling the app
+### Recompiling the app
 
 Download the entire repository to a location of your choosing then open a command terminal there.
 Run "graldew.bat install" if you're on Windows or ./gradlew install if you're on Linux
